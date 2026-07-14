@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Content Generator | Gemma 4</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Content<span class="gradient-text">Genius</span></h1>
+            <p>Powered by Gemma 4 & Agentic Workflows</p>
+        </header>
+
+        <main>
+            <div class="card input-section">
+                <h2>What would you like to write about?</h2>
+                <form id="generator-form">
+                    <div class="input-group">
+                        <input type="text" id="topic-input" placeholder="e.g. The future of Quantum Computing in 2026"
+                            required autocomplete="off">
+                        <button type="submit" id="generate-btn">
+                            <span class="btn-text">Generate</span>
+                            <div class="spinner" id="btn-spinner"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="results-container" id="results-container" style="display: none;">
+                <div class="card status-card">
+                    <h3>Workflow Status</h3>
+                    <ul class="status-list" id="status-list">
+                        <li class="status-item active" id="status-search"><span class="icon">🔍</span> Searching Web...
+                        </li>
+                        <li class="status-item" id="status-scrape"><span class="icon">📄</span> Scraping Sources...</li>
+                        <li class="status-item" id="status-write"><span class="icon">✍️</span> Drafting Blog Post...
+                        </li>
+                        <li class="status-item" id="status-critic"><span class="icon">🧐</span> Critic Review...</li>
+                    </ul>
+                </div>
+
+                <div class="card content-card" id="blog-card" style="display: none;">
+                    <h3>Generated Blog Post</h3>
+                    <div class="content-body" id="blog-content"></div>
+                </div>
+
+                <div class="card content-card critique-card" id="critique-card" style="display: none;">
+                    <h3>Critic Review</h3>
+                    <div class="content-body" id="critique-content"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
