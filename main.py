@@ -1,47 +1,59 @@
-from agents import get_rag_agent,get_research_agent,get_report_agent
+import re
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 
-def run_research_pipeline(topic:str):
-    """Run the Research Pipeline"""
-    state={}
-    search_agent=get_rag_agent()
-    report_agent=get_report_agent()
+app = FastAPI(title="AI Content Generator")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-    search_agent.invoke({
-        "message":[("user",f"Research this topic: {topic}")]
-    })
 
-    state['web_content'] = search_agent.invoke({
-        "message":[("user",f"Research this topic: {topic}")]
-    })['messages'][-1].content
+class GenerateRequest(BaseModel):
+    topic: str
 
-    report_content=report_agent.invoke({
-        "message":[("user",f"Write a report on this topic: {topic}")]
-    })['messages'][-1].content
 
-    state['final_report']=report_content
-    reader_result=reader_agent.invoke({
-        "message":[("user",f"Summarize this report: {report_content}")]
-    })['messages'][-1].content
-    state['final_report']=reader_result
+@app.get("/")
+def read_index():
+    return FileResponse("static/index.html")
 
-    research_combined=(
-        f"Search result: {state['web_content']}"
-        f"\n\nReport result: {state['final_report']}"
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
+
+@app.post("/generate")
+def generate_content(request: GenerateRequest):
+    from agent import critic_chain, writer_chain
+    from tools import scrape_url, web_search
+
+    topic = request.topic.strip()
+    if not topic:
+        raise HTTPException(status_code=400, detail="Topic is required")
+
+    search_results = web_search.invoke({"query": topic})
+    urls = re.findall(r"url:\s*(https?://\S+)", search_results)
+
+    scraped_sections = []
+    for url in urls[:3]:
+        scraped_sections.append(f"Source: {url}\n{scrape_url.invoke({'url': url})}")
+
+    scraped_content = "\n\n".join(scraped_sections).strip()
+    if not scraped_content:
+        scraped_content = search_results
+
+    blog_post = writer_chain.invoke(
+        {
+            "topic": topic,
+            "scraped_content": scraped_content,
+        }
     )
-    state['final_report']=writer_chain.invoke({
-        "topic":topic,
-        "research":research_combined
-    })['messages'][-1].content
+    critique = critic_chain.invoke({"blog_post": blog_post})
 
-    return state
-
-
-if __name__ == "__main__":
-    topic = input("Enter the topic you want to research: ")
-    result = run_research_pipeline(topic)
-    print("\n" + "="*50)
-    print(f"Research Report for: {topic}")
-    print("="*50 + "\n")
-    print(result['final_report'])
+    return {
+        "status": "success",
+        "blog_post": blog_post,
+        "critique": critique,
+    }
