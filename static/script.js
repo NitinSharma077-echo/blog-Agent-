@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const API_BASE_URL = 'https://blog-agent-pw8u.onrender.com';
     const form = document.getElementById('generator-form');
     const topicInput = document.getElementById('topic-input');
     const generateBtn = document.getElementById('generate-btn');
@@ -55,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 5000); // Progress every 5 seconds artificially
 
         try {
-            const response = await fetch('/generate', {
+            const response = await fetch(`${API_BASE_URL}/generate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

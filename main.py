@@ -1,12 +1,23 @@
 import re
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 
 app = FastAPI(title="AI Content Generator")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://blog-agent-ul1k.onrender.com",
+        "https://blog-agent-ul1k.onrender.com/",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
